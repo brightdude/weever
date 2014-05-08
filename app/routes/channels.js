@@ -10,7 +10,7 @@ var meetup = require('meetup-api')('5f162b4a1e6c18144031593436255d38');
 var fs = require("fs");
 var request = require('request')
 
-Array.prototype.unique = function() { //test123//
+Array.prototype.unique = function() { //test123.123//
     var a = this.concat();
     for(var i=0; i<a.length; ++i) {
         for(var j=i+1; j<a.length; ++j) {
