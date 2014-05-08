@@ -10,7 +10,7 @@ var meetup = require('meetup-api')('5f162b4a1e6c18144031593436255d38');
 var fs = require("fs");
 var request = require('request')
 
-Array.prototype.unique = function() {
+Array.prototype.unique = function() { //test123//
     var a = this.concat();
     for(var i=0; i<a.length; ++i) {
         for(var j=i+1; j<a.length; ++j) {
@@ -193,6 +193,28 @@ Users.prototype.index = function(req, res){
   res.send("here is a list of users");
 };
 
+Users.prototype.createMeetupUser = function(meetupUser){
+	models.User.find({sourceId: meetupUser.id}, function(err, _found) {
+	  if (err) return console.error(err);
+	   if (_found.length > 0 ){ 
+		 console.log ('Found member');
+			 models.meetupUser.remove({_id: _found._id}, function(err, _found) {
+			 if (err) return console.error(err);
+				meetupUser.save(function(err, meetupUser ) {
+				if (err) return console.error(err);
+				   console.dir('Updated:[' + meetupUser.sourceId+'] aka: '+meetupUser.name );
+				});				
+			 });
+		 }
+		if (_found.length == 0 ){
+			meetupUser.save(function(err, meetupUser ) {
+			if (err) return console.error(err);
+			 console.dir('New User created:[' + meetupUser.sourceId+'] aka: '+meetupUser.name );
+			 });	
+		 }
+	}
+	).where('sourceType').equals('meetup').limit(1);
+}
 Users.prototype.create = function(req, res){
 	
 	var d = req.body;
@@ -437,12 +459,9 @@ Channels.prototype.create = function(req, res){
 		
 		if (u) { // user already exists
 			
-					d.subscribers = [u._id];
-			
+					d.subscribers = [u._id];	
 				    new Channel(d).save(function(err , result) {
-
-					  console.log(result);
-					  
+					  console.log(result);					  
 				  	  if (u.subscriptions)
 						  u.subscriptions.push (result._id);
 					  else
@@ -453,8 +472,7 @@ Channels.prototype.create = function(req, res){
 					  Channel.find ({ _id : result._id })
 					  .populate ('subscribers')
 					  .populate ('messages')
-					  .exec(function (err, result) {  
- 	  		  	
+					  .exec(function (err, result) {
 			       		 res.send (result);
 				  
 					  });					  
@@ -984,8 +1002,5 @@ var sendMail = function (params) {
 	
 }
 
-
 module.exports = {"Channels" : Channels , "Users" : Users, "Messages" : Messages};
-
-
 
