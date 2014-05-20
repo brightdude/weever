@@ -1,0 +1,14 @@
+{
+  "name": "channel-tes",
+  "version": "0.0.1",
+  "private": true,
+  "scripts": {
+    "start": "node test.js"
+  },
+  "dependencies": {
+    "request": "*",
+    "restler": "*",
+    "underscore": "*",
+    "moment": "*"
+  }
+}

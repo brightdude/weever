@@ -37,6 +37,31 @@ var app = express();
 app.set('port', process.env.PORT || 3500);
 // app.set('views', path.join(__dirname, 'views'));
 // app.set('view engine', 'jade');
+app.use(function (req, res, next) {
+
+    // Website you wish to allow to connect
+    res.setHeader('Access-Control-Allow-Origin', '*');
+	
+    // res.setHeader('Access-Control-Allow-Origin', 'https://www.bontebox.com');
+    // 	
+    // res.setHeader('Access-Control-Allow-Origin', 'http://www.bontebox.com');
+    // 	
+    // res.setHeader('Access-Control-Allow-Origin', 'https://bontebox.com');
+
+    // Request methods you wish to allow
+    res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS, PUT, PATCH, DELETE');
+
+    // Request headers you wish to allow
+    res.setHeader('Access-Control-Allow-Headers', 'X-Requested-With,content-type');
+
+    // Set to true if you need the website to include cookies in the requests sent
+    // to the API (e.g. in case you use sessions)
+    res.setHeader('Access-Control-Allow-Credentials', true);
+
+    // Pass to next layer of middleware
+    next();
+});
+
 app.use(express.logger('dev'));
 app.use(express.bodyParser());
 //app.use(express.methodOverride());
@@ -156,60 +181,64 @@ app.post('/messages',  function(req, res, next) {
 
 // UPLOAD PROCESSING
 
-// app.post('/upload', function(req, res) {
+app.post('/upload', function(req, res) {
 
-	// fs.readFile(req.files.image.path, function (err, data) {
+	fs.readFile(req.files.image.path, function (err, data) {
 
-		// var imageName = req.files.image.name
+		var imageName = req.files.image.name
 
-		// /// If there's an error
-		// if(!imageName){
+		/// If there's an error
+		if(!imageName){
 
-			// console.log("There was an error")
-			// res.send("ERROR");
+			console.log("There was an error")
+			res.send("ERROR");
 
-		// } else {
+		} else {
 
-		   // var newPath = __dirname + "/uploads/" + imageName;
+		   var newPath = __dirname + "/uploads/" + imageName;
 
-		  // /// write file to uploads/fullsize folder
-		  // fs.writeFile(newPath, data, function (err) {
+		  /// write file to uploads/fullsize folder
+		  fs.writeFile(newPath, data, function (err) {
 
-			// console.log ("to dir - " + newPath);
-			// console.log ("dir - " + err);
+			console.log ("to dir - " + newPath);
+			console.log ("dir - " + err);
 
-			// res.send({code : 200});
+			res.send({code : 200});
 
-		  // });
-		// }
-	// });
-// });
+		  });
+		}
+	});
+});
 
-// /// Show files
-// app.get('/upload/:file', function (req, res){
+/// Show files
+app.get('/upload/:file', function (req, res){
 
-		// file = __dirname + "/uploads/" + encodeURIComponent(req.params.file);
+		file = __dirname + "/uploads/" + encodeURIComponent(req.params.file);
+		
+		if (!fs.existsSync(file)) {
+			file = __dirname + "/uploads/placeholder.jpg";
+		}
 	
-		// var stat = fs.statSync(file);
+		var stat = fs.statSync(file);
 
-	    // res.writeHead(200, {
-	        // //'Content-Type': 'audio/mpeg',
-	        // 'Content-Length': stat.size
-	    // });
+	    res.writeHead(200, {
+	        //'Content-Type': 'audio/mpeg',
+	        'Content-Length': stat.size
+	    });
 
-	    // var readStream = fs.createReadStream(file);
-	    // // We replaced all the event handlers with a simple call to readStream.pipe()
-	    // readStream.pipe(res);
+	    var readStream = fs.createReadStream(file);
+	    // We replaced all the event handlers with a simple call to readStream.pipe()
+	    readStream.pipe(res);
 	
-	// // var img = fs.readFileSync(__dirname + "/uploads/" + file);
-	// // //res.writeHead(200, {'Content-Type': 'image/jpg' });
-	// // res.end(img, 'binary');
+	// var img = fs.readFileSync(__dirname + "/uploads/" + file);
+	// //res.writeHead(200, {'Content-Type': 'image/jpg' });
+	// res.end(img, 'binary');
 
-// });
-channel.sync();
-//console.log('Got this far biyatch');
+});
+
+// channel.sync();
+
+
 http.createServer(app).listen(app.get('port'), function(){
   console.log('Express server listening on port ' + app.get('port'));
 });
-
-//channel.sync();
