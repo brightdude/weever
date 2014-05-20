@@ -1,0 +1,211 @@
+//***********************  SoundRecordVC.m   ***************************//
+
+
+#import "SoundRecordVC.h"
+
+@interface SoundRecordVC.m ()
+
+@end
+
+@implementation SoundRecordVC.m
+
+@synthesize recordBtn;
+@synthesize playBtn;
+
+
+- (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil
+{
+    self = [super initWithNibName:nibNameOrNil bundle:nibBundleOrNil];
+    if (self) {
+        // Custom initialization
+    }
+    return self;
+}
+
+- (void)viewDidLoad
+{
+    [super viewDidLoad];
+}
+
+#pragma mark -
+#pragma mark - methods
+
+- (IBAction)recordBtnPressed:(id)sender
+{
+    if (!stopBtnFlag)
+    {
+        if (!audioRecorder.recording)
+        {
+            [self performSelectorOnMainThread:@selector(setUpAudioRecorder) withObject:nil waitUntilDone:YES];
+            [audioRecorder record];
+             NSLog(@"Recording...");
+
+        }
+        stopBtnFlag = YES;
+    }
+    else
+    {
+        [audioRecorder stop];
+        stopBtnFlag = NO;
+
+      }
+}
+-(void)setUpAudioRecorder
+{
+    AVAudioSession *audioSession = [AVAudioSession sharedInstance];
+    [audioSession setCategory:AVAudioSessionCategoryRecord error:nil];
+
+    // --------------------- Setting for audio ----------------------//
+
+    NSDictionary *recordSettings = [NSDictionary dictionaryWithObjectsAndKeys:[NSNumber numberWithInt:AVAudioQualityMedium],AVEncoderAudioQualityKey,[NSNumber numberWithInt:16],AVEncoderBitRateKey,[NSNumber numberWithInt:2],AVNumberOfChannelsKey,[NSNumber numberWithInt:44100.0],AVSampleRateKey, nil];
+
+    NSError *error = nil;
+
+
+    // --------------------- File save Path ----------------------//
+    NSArray *paths = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES);
+    NSString *documentsDirectory = [paths objectAtIndex:0];
+    NSURL *url = [NSURL fileURLWithPath:[NSString stringWithFormat:@"%@/sounds.caf", documentsDirectory]];
+
+
+    audioRecorder = [[AVAudioRecorder alloc] initWithURL:url settings:recordSettings error:&error];
+    audioRecorder.delegate = self;
+
+    if ([audioRecorder prepareToRecord] == YES){
+        [audioRecorder prepareToRecord];
+
+    }else {
+        int errorCode = CFSwapInt32HostToBig ([error code]);
+        NSLog(@"Error: %@ [%4.4s])" , [error localizedDescription], (char*)&errorCode);
+
+    }
+}
+
+- (IBAction)playBtnPressed:(id)sender {
+
+    AVAudioSession *audioSession = [AVAudioSession sharedInstance];
+    [audioSession setCategory:AVAudioSessionCategoryPlayback error:nil];
+
+    //----------------------loading files to player for playing------------------------------------//
+
+    NSArray *paths = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES);
+    NSString *documentsDirectory = [paths objectAtIndex:0];
+    NSURL *url = [NSURL fileURLWithPath:[NSString stringWithFormat:@"%@/sounds.caf", documentsDirectory]];
+
+
+    NSError *error;
+    NSLog(@"url is %@",url);
+
+    [audioPlayer stop];
+    audioPlayer = [[AVAudioPlayer alloc] initWithContentsOfURL:url error:&error];
+    audioPlayer.numberOfLoops = 0;
+    audioPlayer.delegate=self;
+    [audioPlayer prepareToPlay];
+
+    if(!pauseBtnFlag){
+
+        NSLog(@"Playing.......");
+        [audioPlayer play];
+         pauseBtnFlag=YES;
+
+    }else{
+         NSLog(@"Pause");
+        [audioPlayer pause];
+        pauseBtnFlag=NO;
+    }
+
+}
+
+#pragma mark - 
+#pragma mark - AVRecorder Delegate
+
+-(void)audioRecorderDidFinishRecording: (AVAudioRecorder *)recorder successfully:(BOOL)flag
+{
+    NSLog (@"audioRecorderDidFinishRecording:successfully");
+    NSLog(@"Stopped");
+
+}
+-(void)audioRecorderEncodeErrorDidOccur:(AVAudioRecorder *)recorder error:(NSError *)error
+{
+    NSLog(@"Encode Error occurred");
+}
+
+-(void)audioPlayerDidFinishPlaying:(AVAudioPlayer *)player successfully:(BOOL)flag
+{
+
+}
+
+-(void)dataUploadOnServer
+        {
+             NSLog(@"upload");
+                recStateLabel.text = @"Uploading";
+
+                NSString *baseurl = @"http://efron.org.il/dev/singsong/upload.php";
+                NSURL *dataURL = [NSURL URLWithString:baseurl]; 
+
+                   NSMutableURLRequest *dataRqst = [NSMutableURLRequest requestWithURL:dataURL cachePolicy:NSURLRequestUseProtocolCachePolicy timeoutInterval:30.0];
+
+                        [dataRqst setHTTPMethod:@"POST"];
+
+                        NSString *stringBoundary = @"0xKhTmLbOuNdArY---This_Is_ThE_BoUnDaRyy---pqo";
+                        NSString *headerBoundary = [NSString stringWithFormat:@"multipart/form-data; boundary=%@",stringBoundary];
+
+                        [dataRqst addValue:headerBoundary forHTTPHeaderField:@"Content-Type"];
+
+                        NSMutableData *postBody = [NSMutableData data];
+
+
+                        // -------------------- ---- Audio Upload Status ---------------------------\\
+                        //pass MediaType file
+
+                        [postBody appendData:[[NSString stringWithFormat:@"--%@\r\n", stringBoundary] dataUsingEncoding:NSUTF8StringEncoding]];
+                        [postBody appendData:[@"Content-Disposition: form-data; name=\"Data\"; filename=\"myVoice.mp3\"\r\n" dataUsingEncoding:NSUTF8StringEncoding]];
+                        [postBody appendData:[@"Content-Type: audio/caf\r\n" dataUsingEncoding:NSUTF8StringEncoding]];
+                        [postBody appendData:[@"Content-Transfer-Encoding: binary\r\n\r\n" dataUsingEncoding:NSUTF8StringEncoding]];
+                        //*******************load locally store audio file********************//
+                        NSArray *paths = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES);
+                        NSString *documentsDirectory = [paths objectAtIndex:0];
+                        NSString *audioUrl = [NSString stringWithFormat:@"%@/record.mp3", documentsDirectory]; 
+
+
+                        // get the audio data from main bundle directly into NSData object
+                        NSData *audioData;
+                        audioData = [[NSData alloc] initWithContentsOfFile:audioUrl];
+                        // add it to body
+                        [postBody appendData:audioData];
+                        [postBody appendData:[@"\r\n" dataUsingEncoding:NSUTF8StringEncoding]];
+
+                        // final boundary
+
+                        [postBody appendData:[[NSString stringWithFormat:@"--%@--\r\n", stringBoundary] dataUsingEncoding:NSUTF8StringEncoding]];
+
+                        // add body to post
+
+                        [dataRqst setHTTPBody:postBody];
+
+                        NSHTTPURLResponse* response =[[NSHTTPURLResponse alloc] init];
+                        NSError* error = [[NSError alloc] init] ;
+
+                        //synchronous filling of data from HTTP POST response
+                        NSData *responseData = [NSURLConnection sendSynchronousRequest:dataRqst returningResponse:&response error:&error];
+
+                        //convert data into string
+                        NSString *responseString = [[NSString alloc] initWithBytes:[responseData bytes] length:[responseData length] encoding:NSUTF8StringEncoding];
+
+                        NSLog(@"Response String %@",responseString);
+}
+
+
+#pragma mark -
+
+- (void)didReceiveMemoryWarning
+{
+    [super didReceiveMemoryWarning];
+    // Dispose of any resources that can be recreated.
+}
+
+- (void)viewDidUnload
+{
+    [self setPlayBtn:nil];
+    [super viewDidUnload];
+}
