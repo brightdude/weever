@@ -1,4 +1,5 @@
 var mongoose = require('mongoose');
+var testIlya='ilyaTest';
 
 var messageSchema = mongoose.Schema({
 	fromUser : { type: mongoose.Schema.Types.ObjectId , ref: 'users' },
