@@ -20,8 +20,6 @@ var fs = require("fs");
 var request = require('request')
 var AWS = require('aws-sdk');
 
-AWS.config.update({accessKeyId: 'AKIAI2IGTMXJDQGXFIQQ', secretAccessKey: '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'});
-AWS.config.update({region: 'us-west-1'});
 
 Array.prototype.unique = function() {
     var a = this.concat();
