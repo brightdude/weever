@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>IDESourceControlProjectFavoriteDictionaryKey</key>
+	<false/>
+	<key>IDESourceControlProjectIdentifier</key>
+	<string>090F2F61-978D-4D93-8B88-1572328C8F94</string>
+	<key>IDESourceControlProjectName</key>
+	<string>weever</string>
+	<key>IDESourceControlProjectOriginsDictionary</key>
+	<dict>
+		<key>0FB06237-A959-4B5A-AB9A-F2C3C94F8B6F</key>
+		<string>https://github.com/brightdude/weever.git</string>
+	</dict>
+	<key>IDESourceControlProjectPath</key>
+	<string>Client/iOS/weever.xcodeproj/project.xcworkspace</string>
+	<key>IDESourceControlProjectRelativeInstallPathDictionary</key>
+	<dict>
+		<key>0FB06237-A959-4B5A-AB9A-F2C3C94F8B6F</key>
+		<string>../../../..</string>
+	</dict>
+	<key>IDESourceControlProjectURL</key>
+	<string>https://github.com/brightdude/weever.git</string>
+	<key>IDESourceControlProjectVersion</key>
+	<integer>110</integer>
+	<key>IDESourceControlProjectWCCIdentifier</key>
+	<string>0FB06237-A959-4B5A-AB9A-F2C3C94F8B6F</string>
+	<key>IDESourceControlProjectWCConfigurations</key>
+	<array>
+		<dict>
+			<key>IDESourceControlRepositoryExtensionIdentifierKey</key>
+			<string>public.vcs.git</string>
+			<key>IDESourceControlWCCIdentifierKey</key>
+			<string>0FB06237-A959-4B5A-AB9A-F2C3C94F8B6F</string>
+			<key>IDESourceControlWCCName</key>
+			<string>github</string>
+		</dict>
+	</array>
+</dict>
+</plist>
