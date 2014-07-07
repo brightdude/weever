@@ -1,0 +1,27 @@
+  { 'lat' : '34.041034', 'lon' : '-118.361857','radius':'100','fields':'event_hosts'},
+  
+  ownerId: { type: mongoose.Schema.Types.ObjectId , ref: 'users' }, // owner id for now
+  partnerId : String, // Who the Data Source partner is (eg. MeetUp)
+  partnerItemId : String, // the Item ID from the partner data set
+  name : String,
+  content : String,
+  color : String,
+  image : String,
+  sound : String,
+  pin : String,
+  loc : [],
+  type : { type : Number, default : 0 } ,
+  radius : {type : Number , default : 100 },
+  subscribers : [{ type: mongoose.Schema.Types.ObjectId , ref: 'users' }],
+  posts : [{ type: mongoose.Schema.Types.ObjectId , ref: 'channelPosts' }],
+  timestamp : { type: Date, default: Date.now },
+  ttl : {type : Date , default : Date.now }
+  
+  
+'qzggjjyshbdc',
+ '183747152',
+ 'ddbmshyshbdc',
+ '181376942',
+ 'qsdhgdyshbdc',
+ '182998032',
+ 'qrpghhyshbdc',

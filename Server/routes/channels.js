@@ -1,12 +1,3 @@
-/*
-
-AWSAccessKeyId=AKIAI2IGTMXJDQGXFIQQ
-AWSSecretKey=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
-
-AWS.config.update({accessKeyId: 'AKIAI2IGTMXJDQGXFIQQ', secretAccessKey: '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'});
-AWS.config.update({region: 'us-west-1'});
-*/
-
 var mongoose = require('mongoose');
 var Q = require('q');
 var mandrill = require('mandrill-api/mandrill');
@@ -18,8 +9,6 @@ var apn = require('apn');
 var meetup = require('meetup-api')('5f162b4a1e6c18144031593436255d38');
 var fs = require("fs");
 var request = require('request')
-var AWS = require('aws-sdk');
-
 
 Array.prototype.unique = function() {
     var a = this.concat();
@@ -37,6 +26,7 @@ Array.prototype.unique = function() {
 
     return a;
 };
+
 
 function Channels() {
 }
@@ -78,6 +68,7 @@ feedback.on("feedback", function(devices) {
 
 }
 
+
 function Users() {
 	//mongoose.connect('localhost', 'data');
 	//mongoose = db;
@@ -99,26 +90,18 @@ var Message = mongoose.model('messages' , messageSchema);
 
 
 var userSchema = mongoose.Schema({
-  ownerId : { type: mongoose.Schema.Types.ObjectId , ref: 'users' },
-  selectedId : { type: mongoose.Schema.Types.ObjectId , ref: 'users' },
-  layout : String,
-  card_name : String,
+  avatar : String,
+  cover  : String,
   firstName: String,
   lastName : String,
   title : String,
   bio 	: String,
   email : String,
-  handle : String,
-  avatar : String,
-  cover  : String,
   device : String,
   pushId : String,
-  settings : String,
-  
   subscriptions : [{ type: mongoose.Schema.Types.ObjectId , ref: 'channels' }],
-  other_ids : [{ type: mongoose.Schema.Types.ObjectId , ref: 'users' }],
-  active : { type: Date, default: Date.now },
   timestamp : { type: Date, default: Date.now },
+  settings : String,
   loc: []
 });
 
@@ -198,25 +181,6 @@ Messages.prototype.create = function(req, res){
   			console.log (JSON.stringify(result));
   			res.send(result);
   		});
-		
-		User.findOne ( {_id : d.toUser } , function (err, result) {
-
-				  var u = result;
-				  
-						if (u && u.pushId) {  
-						
-				  					u.active = new Date();
-							
-							  		sendPushNotification (u.pushId, 
-							  							  d.message, 
-							  							  {'type' : 'chat' , 'from': d.fromUser }
-							   					   );
-												   
-					 				  u.save (function(err) {
-					 							if(err) console.log(err);
-					 						});
-								}				  
-		});
 	
 };
 
@@ -236,6 +200,7 @@ Users.prototype.create = function(req, res){
 	console.log (JSON.stringify(d))
 	
 	if (d._id && d._id.length > 0) {
+
 		User.findOne ({_id : d._id },  function (err, result) {
 
 			var user = result;
@@ -257,43 +222,14 @@ Users.prototype.create = function(req, res){
 			
 			
 		});
-	} 
-	else	
-	{
+	} else	{
 
      	delete d._id;
 
       	 new User(d).save (function(err , result) {
-      		    //console.log (JSON.stringify(err)) // save the whole things regardless
-      		console.log (JSON.stringify(result));
-				
-	   		 if (d.ownerId && d.ownerId.length > 0) {
-				 
-				 var newId = result._id;
-	   			 // creating a child record
-			 
-	   	 		User.findOne ({_id : d.ownerId },  function (err, result) {
-
-	   	 			var user = result;
-				
-	   				if (user.other_ids && user.other_ids.length > 0) {
-						user.other_ids.push (newId);
-	   				}
-					else {
-						user.other_ids = [newId];
-					}
-			
-	   	 			user.save ();
-
-	   	 			res.send (user);
-			
-	   	 		});
-			 
-	   		 } 
-			 else { 
-       			res.send(result);
-			 }
-				
+      		 //console.log (JSON.stringify(err))
+      			console.log (JSON.stringify(result));
+      			res.send(result);
       		});
 		
 	}
@@ -328,11 +264,13 @@ var d = req.body;
 	if (d._id && d._id.length > 0)
 		criteria = {_id : d._id };
 	else
-	if (d.device && d.device.length > 0)
-		criteria = { device : d.device };
-	else {
-		criteria = { handle : d.handle };
-	}
+		if (d.device && d.device.length > 0)
+			criteria = { device : d.device };
+		else {
+			res.send ({});
+			return;
+		}
+	
 
 	User.findOne ( criteria ,  function (err, result) {
 
@@ -354,72 +292,6 @@ Users.prototype.checkIn = function(req, res){
 };
 
 /*  CHANNEL FUNCTIONS */
-
-var saveChannel = function (userId , channelId , subscribe) {
-	
-	var deferred = Q.defer();
-		
-	
-		Channel.findOne( { _id : channelId }, function (err, result) {
-			  //if (err) return handleError(err);
-			  var c = result;
-	  
-			  
-			  var newArr = [];
-			  for (var i = 0 ; i < c.subscribers.length ; i ++)  {
-				  if (c.subscribers[i].toString() != userId)
-					  newArr.push (c.subscribers[i]);
-			  }
-			  
-			  c.subscribers = newArr;
-	  
-	  		  if (subscribe)
-				  c.subscribers.push (userId);
-				  
-	  
-			  c.save ( function(err) {
-					if(err) throw err;
-					deferred.resolve(c);
-				});
-	  
-		});
-		
-	return deferred.promise;
-	
-}
-
-var saveUser = function (userId , channelId , subscribe) {
-	
-	var deferred = Q.defer();
-
-	User.findOne ( {_id : userId } , function (err, result) {
-	
-			  var u = result;
-			
-			  var newArr = [];
-			  for (var i = 0 ; i < u.subscriptions.length ; i ++)  {
-				  if (u.subscriptions.toString() != channelId)
-					  newArr.push (u.subscriptions[i]);
-			  }
-		  
-			  u.subscriptions = newArr;
-			
-	  		  if (subscribe)
-				  u.subscriptions.push (channelId);
-
-			  u.save ( function(err) {
-						if(err) throw err;
-					
-						deferred.resolve(u);
-					
-						console.log('user saved #' + ':\t' + u.pushId);
-					});
-	
-	});
-		
-	return deferred.promise;
-	
-}
 
 Channels.prototype.sync = function() {
 	
@@ -462,20 +334,17 @@ Channels.prototype.sync = function() {
 					content : ev.description,
 					loc : ev.venue ? [ev.venue.lon , ev.venue.lat   ] : ev.group ? [ev.group.group_lon , ev.group.group_lat ] : [] ,
 				};
-				
+				console.log (ev.name)
+/*
 				(function(e) {
-							
 							var condition = { partnerItemId : e.partnerItemId.toString()};
-							
 							console.log ("ID Before " + condition);
-							
 							Channel.find()
 							.where('partnerItemId').in([e.partnerItemId.toString()])
 							.exec().then (function (val , result) {
 								
 								// console.log ("error");
 								console.log (result);
-								
 								console.log (val);
 								
 								  if (!result || result.length == 0 ) {
@@ -504,7 +373,8 @@ Channels.prototype.sync = function() {
 	  
 							});
 				     })(o);
-				
+*/
+					 //////////
 			}
 		};//);
 	});
@@ -653,6 +523,72 @@ Channels.prototype.find = function(req, res){
   
 };
 
+var saveChannel = function (userId , channelId , subscribe) {
+	
+	var deferred = Q.defer();
+		
+	
+		Channel.findOne( { _id : channelId }, function (err, result) {
+			  //if (err) return handleError(err);
+			  var c = result;
+	  
+			  
+			  var newArr = [];
+			  for (var i = 0 ; i < c.subscribers.length ; i ++)  {
+				  if (c.subscribers[i].toString() != userId)
+					  newArr.push (c.subscribers[i]);
+			  }
+			  
+			  c.subscribers = newArr;
+	  
+	  		  if (subscribe)
+				  c.subscribers.push (userId);
+				  
+	  
+			  c.save ( function(err) {
+					if(err) throw err;
+					deferred.resolve(c);
+				});
+	  
+		});
+		
+	return deferred.promise;
+	
+}
+
+var saveUser = function (userId , channelId , subscribe) {
+	
+	var deferred = Q.defer();
+
+	User.findOne ( {_id : userId } , function (err, result) {
+	
+			  var u = result;
+			
+			  var newArr = [];
+			  for (var i = 0 ; i < u.subscriptions.length ; i ++)  {
+				  if (u.subscriptions.toString() != channelId)
+					  newArr.push (u.subscriptions[i]);
+			  }
+		  
+			  u.subscriptions = newArr;
+			
+	  		  if (subscribe)
+				  u.subscriptions.push (channelId);
+
+			  u.save ( function(err) {
+						if(err) throw err;
+					
+						deferred.resolve(u);
+					
+						console.log('user saved #' + ':\t' + u.pushId);
+					});
+	
+	});
+		
+	return deferred.promise;
+	
+}
+
 Channels.prototype.subscribe = function(req, res) {
 	// subscribe user to a channel
 	
@@ -731,13 +667,11 @@ Channels.prototype.findNear = function(req, res){
 				  var u = result;
 				  
 				  u.loc = [ parseFloat(d.loc[0]), parseFloat(d.loc[1]) ];
-				  u.active = new Date();
 				  
 				  u.save ( function(err) {
 					  
 							if(err) console.log(err);
 							console.log('user saved #' + ':\t' + u._id);
-							
 						});
 		});
 
@@ -798,36 +732,6 @@ Channels.prototype.findMessages = function(req, res){
 	});
   
 };
-
-var sendPushNotification =  function (token , content, payload ) {
-
-		var options = { "gateway": "gateway.sandbox.push.apple.com",
-						passphrase: "Poiu0987"
-					};
-
-		var apnConnection = new apn.Connection(options);
-
-//		var token= "bf0f9bab4fbfaa825a6de9dc734a3397b5ef46f7ccab5dd2d62abba703b4ebba";
-		token = token.replace(" " , "").replace("<", "").replace(">","");
-
-		//console.log('pushing to token #' + ':\t' + token);
-
-		var myDevice = new apn.Device(token);
-
-		var note = new apn.Notification();
-
-		note.expiry = Math.floor(Date.now() / 1000) + 3600; // Expires 1 hour from now.
-		note.badge = 1;
-		// note.content-available : 1 // need it in order to handle background mode updates
-		note.sound = "ping.aiff";
-		note.alert =  content;//"\uD83D\uDCE7 \u2709 You have a new message";
-		
-		if (payload)
-			note.payload = payload;
-
-		apnConnection.pushNotification(note, myDevice);
-	
-}
 
 Channels.prototype.post = function(req, res){
 	// when a message is posted to the channel need to send the message to subscribers
@@ -899,24 +803,42 @@ Channels.prototype.post = function(req, res){
 									for (var i = 0 ; i < users.length ; i++ ) {
 										
 										if (users[i].pushId && users[i].pushId.length > 0 ) {
-											
-											sendPushNotification (users[i].pushId, 
-																  d.content,
-																  {'type' : 'post' , 'from' : d.channel } 
-															  );
+											var options = { "gateway": "gateway.sandbox.push.apple.com",
+															passphrase: "Poiu0987"
+														};
 
+											var apnConnection = new apn.Connection(options);
 
+					//						var token= "bf0f9bab4fbfaa825a6de9dc734a3397b5ef46f7ccab5dd2d62abba703b4ebba";
+											var token= users[i].pushId.replace(" " , "").replace("<", "").replace(">","");
+
+											console.log('pushing to token #' + ':\t' + token);
+
+											var myDevice = new apn.Device(token);
+
+											var note = new apn.Notification();
+
+											note.expiry = Math.floor(Date.now() / 1000) + 3600; // Expires 1 hour from now.
+											note.badge = 1;
+											// note.content-available : 1 // need it in order to handle background mode updates
+											note.sound = "ping.aiff";
+											note.alert =  d.content;//"\uD83D\uDCE7 \u2709 You have a new message";
+											note.payload = {'messageFrom': users[i].firstName };
+
+											apnConnection.pushNotification(note, myDevice);
 									}
 									
 								  }
 						
 								}
+					  
 				  
 							  // var msg = { "to" : {email : user.email , name : user.name , subject : "Notification" } , name : user.name , status : d.message.body , email : user.email };
 				  
 							  // sendMail (tpl(msg));
 				  
 						});
+			
 					  
 			  }
 			  

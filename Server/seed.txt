@@ -1,0 +1,35 @@
+var Test = function () {
+	
+}
+var seedMapPoints=[
+{ 'lat' : '34.041034', 'lon' : '-118.361857','radius':'100','fields':'event_hosts'},
+{ 'lat' : '34.031196', 'lon' : '-118.433480','radius':'100','fields':'event_hosts'},
+{ 'lat' : '33.984664', 'lon' : '-118.442148','radius':'100','fields':'event_hosts'},
+{ 'lat' : '33.915810', 'lon' : '-118.106169','radius':'100','fields':'event_hosts'},
+{ 'lat' : '33.918374', 'lon' : '-118.376020','radius':'100','fields':'event_hosts'},
+{ 'lat' : '33.838279', 'lon' : '-118.337225','radius':'100','fields':'event_hosts'},
+{ 'lat' : '33.791499', 'lon' : '-118.103765','radius':'100','fields':'event_hosts'},
+{ 'lat' : '33.714491', 'lon' : '-117.964625','radius':'100','fields':'event_hosts'},
+{ 'lat' : '33.684071', 'lon' : '-117.889438','radius':'100','fields':'event_hosts'},
+{ 'lat' : '33.679643', 'lon' : '-117.780433','radius':'100','fields':'event_hosts'},
+{ 'lat' : '33.543539', 'lon' : '-117.671414','radius':'100','fields':'event_hosts'},
+{ 'lat' : '33.519500', 'lon' : '-117.992077','radius':'100','fields':'event_hosts'},
+{ 'lat' : '33.656208', 'lon' : '-117.289639','radius':'100','fields':'event_hosts'},
+{ 'lat' : '33.549262', 'lon' : '-117.179776','radius':'100','fields':'event_hosts'},
+{ 'lat' : '33.420981', 'lon' : '-117.606182','radius':'100','fields':'event_hosts'},
+{ 'lat' : '33.210397', 'lon' : '-117.372036','radius':'100','fields':'event_hosts'},
+{ 'lat' : '33.042485', 'lon' : '-117.296505','radius':'100','fields':'event_hosts'},
+{ 'lat' : '32.766923', 'lon' : '-117.096005','radius':'100','fields':'event_hosts'},
+{ 'lat' : '34.151205', 'lon' : '-118.224492','radius':'100','fields':'event_hosts'},
+{ 'lat' : '34.169387', 'lon' : '-118.374180','radius':'100','fields':'event_hosts'},
+{ 'lat' : '34.169387', 'lon' : '-118.625493','radius':'100','fields':'event_hosts'},
+{ 'lat' : '34.208010', 'lon' : '-119.169316','radius':'100','fields':'event_hosts'},
+{ 'lat' : '34.114830', 'lon' : '-117.270054','radius':'100','fields':'event_hosts'},
+{ 'lat' : '35.344995', 'lon' : '-119.063572','radius':'100','fields':'event_hosts'}
+];
+
+Test.prototype.channelCreate = function(req, res) {
+}
+
+Test.seedMapPoints=seedMapPoints;
+test.channelCreate();
