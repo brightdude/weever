@@ -1,0 +1,15 @@
+
+
+<div class="container">
+	<div id="appMain">
+		@{view('login')}
+	</div>
+	
+@{foreach property in model}
+    <div>@{property.alias}</div>
+@{end}
+
+@{json(model, '_model2', true)};
+
+
+</div>
