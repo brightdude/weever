@@ -9,7 +9,9 @@ var meetup = require('meetup-api')('5f162b4a1e6c18144031593436255d38');
 
 
 function pm_process (m , action) {
-	
+	var KKK="sss";
+	KKK="hellYea"; 
+	KK="gg";
 	var deferred = Q.defer();
 	
 	/*
